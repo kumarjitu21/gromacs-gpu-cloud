@@ -87,11 +87,69 @@ The GROMACS build is configured with:
 - `GMX_BUILD_OWN_FFTW=ON` - Build FFTW internally
 - `GMX_DOUBLE=OFF` - Single precision (faster, less memory)
 
-## 🏃 Running Molecular Dynamics Simulations
+## 📤 Preparing Input Files
 
-After installation, use `run_md_aws.sh` to run your MD simulations:
+Before running MD simulations, you need to copy your GROMACS input files to the EC2 instance. Prepare your input files locally and then transfer them using `scp`.
+
+### Required Input Files
+
+- **MD.tpr**: Binary input file containing system topology and simulation parameters
+- **MD.cpt**: Checkpoint file (if continuing from a previous simulation)
+- **MD.gro**: Structure file (optional, if needed)
+- **MD.mdp**: MD parameters file (if generating new .tpr file)
+
+### Copying Files to EC2 Instance
+
+From your local machine, use `scp` to copy files to the EC2 instance:
 
 ```bash
+# Create the mdrun directory on the EC2 instance (if it doesn't exist)
+ssh ec2-user@<EC2-IP> "mkdir -p /home/ec2-user/mdrun"
+
+# Copy input files to the EC2 instance
+scp MD.tpr MD.cpt ec2-user@<EC2-IP>:/home/ec2-user/mdrun/
+```
+
+**Note**: 
+- Replace `<EC2-IP>` with your actual EC2 instance IP address or hostname
+- For Ubuntu instances, the default user is typically `ubuntu` instead of `ec2-user`
+- If you have additional files (e.g., `MD.gro`, `MD.mdp`), include them in the scp command
+- Ensure your SSH key has proper permissions: `chmod 400 your-key.pem`
+
+### Example with Additional Files
+
+```bash
+# Copy all required files at once
+scp MD.tpr MD.cpt MD.gro MD.mdp ec2-user@<EC2-IP>:/home/ec2-user/mdrun/
+```
+
+### Using SSH Key File
+
+If you're using a specific SSH key file:
+
+```bash
+scp -i /path/to/your-key.pem MD.tpr MD.cpt ec2-user@<EC2-IP>:/home/ec2-user/mdrun/
+```
+
+### Verify Files Are Copied
+
+After copying, verify the files are on the instance:
+
+```bash
+ssh ec2-user@<EC2-IP> "ls -lh /home/ec2-user/mdrun/"
+```
+
+## 🏃 Running Molecular Dynamics Simulations
+
+After copying your input files to the EC2 instance, navigate to the directory containing your files and run the simulation.
+
+### Using the Run Script
+
+```bash
+# Navigate to the directory with your input files
+cd /home/ec2-user/mdrun
+
+# Copy the run script to this directory (or navigate to where it is)
 # Make the script executable
 chmod +x run_md_aws.sh
 
@@ -104,6 +162,9 @@ chmod +x run_md_aws.sh
 You can also run GROMACS MD simulations directly with GPU acceleration:
 
 ```bash
+# Navigate to the directory with your input files
+cd /home/ec2-user/mdrun
+
 # Disable GPU compatibility check (useful for compatibility issues)
 export GMX_GPU_DISABLE_COMPATIBILITY_CHECK=1
 
@@ -114,7 +175,10 @@ export GMX_GPU_DISABLE_COMPATIBILITY_CHECK=1
 gmx mdrun -deffnm MD -nb gpu -v
 ```
 
-**Note**: Ensure you have prepared your GROMACS input files (`.tpr`, `.gro`, `.mdp`, etc.) before running simulations. The `-deffnm MD` flag expects files named `MD.tpr` (topology), `MD.gro` (structure), and `MD.mdp` (parameters).
+**Note**: 
+- Ensure you have copied your input files to the EC2 instance before running simulations (see [Preparing Input Files](#-preparing-input-files) section)
+- The `-deffnm MD` flag expects files named `MD.tpr` (topology/run input), `MD.cpt` (checkpoint), and optionally `MD.gro` (structure) and `MD.mdp` (parameters)
+- Make sure you're in the correct directory where your input files are located
 
 ## 💰 Cost Considerations
 
@@ -163,11 +227,12 @@ source ~/.bashrc
 
 ## 🔄 Next Steps
 
-1. Prepare your molecular dynamics input files
-2. Upload your simulation files to the instance
-3. Run simulations using `run_md_aws.sh`
-4. Monitor GPU utilization with `nvidia-smi`
-5. Download results and terminate the instance to save costs
+1. Prepare your molecular dynamics input files locally (`.tpr`, `.cpt`, `.gro`, `.mdp`)
+2. Copy input files to the EC2 instance using `scp` (see [Preparing Input Files](#-preparing-input-files))
+3. SSH into the instance and navigate to the directory with your files
+4. Run simulations using `run_md_aws.sh` or directly with `gmx mdrun`
+5. Monitor GPU utilization with `nvidia-smi` during simulation
+6. Download results using `scp` and terminate the instance to save costs
 
 ## 📝 Notes
 
