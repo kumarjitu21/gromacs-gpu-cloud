@@ -1,0 +1,28 @@
+# SSH keys and credentials (never commit)
+*.pem
+*.key
+*.crt
+.env
+.env.*
+*.credentials
+*credentials*
+
+# Local / confidential overrides (use placeholders in docs)
+*local*
+*secret*
+*confidential*
+
+# OS and editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# GROMACS run artifacts (optional; uncomment if you don't want to track outputs)
+# *.tpr
+# *.cpt
+# *.xtc
+# *.edr
+# *.gro
+# *.xvg

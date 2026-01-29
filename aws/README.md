@@ -25,8 +25,8 @@ This directory contains scripts for installing and running GROMACS with GPU acce
 SSH into your instance and run:
 
 ```bash
-# Clone the repository or upload the script
-git clone <your-repo-url>
+# Clone the repository or upload the script (replace <repo-url> with your repository URL)
+git clone <repo-url>
 cd gromacs-gpu-cloud/aws
 
 # Make the script executable
@@ -91,6 +91,8 @@ The GROMACS build is configured with:
 
 Before running MD simulations, you need to copy your GROMACS input files to the EC2 instance. Prepare your input files locally and then transfer them using `scp`.
 
+**Generating input files:** For the full workflow to prepare ligand/receptor, build the system, and produce `MD.tpr` and related files, see the [Linux & GROMACS Universal Tutorial](../docs/LINUX_GROMACS_TUTORIAL.md).
+
 ### Required Input Files
 
 - **MD.tpr**: Binary input file containing system topology and simulation parameters
@@ -98,45 +100,51 @@ Before running MD simulations, you need to copy your GROMACS input files to the 
 - **MD.gro**: Structure file (optional, if needed)
 - **MD.mdp**: MD parameters file (if generating new .tpr file)
 
+### Placeholders
+
+Replace these with your own values (do not commit real values to the repo):
+
+| Placeholder        | Description |
+|--------------------|-------------|
+| `<EC2-IP>`         | EC2 instance public IP or hostname |
+| `<instance-user>` | SSH user (e.g. `ubuntu` for Ubuntu AMI, `ec2-user` for Amazon Linux) |
+| `<remote-path>`   | Path on the instance (e.g. `/home/ubuntu/mdrun` or `/home/ec2-user/mdrun`) |
+| `<your-key.pem>`  | Your SSH private key filename (keep keys out of the repo; use `.gitignore`) |
+
 ### Copying Files to EC2 Instance
 
 From your local machine, use `scp` to copy files to the EC2 instance:
 
 ```bash
 # Create the mdrun directory on the EC2 instance (if it doesn't exist)
-ssh ec2-user@<EC2-IP> "mkdir -p /home/ec2-user/mdrun"
+ssh <instance-user>@<EC2-IP> "mkdir -p <remote-path>"
 
 # Copy input files to the EC2 instance
-scp MD.tpr MD.cpt ec2-user@<EC2-IP>:/home/ec2-user/mdrun/
+scp MD.tpr MD.cpt <instance-user>@<EC2-IP>:<remote-path>/
 ```
 
 **Note**: 
-- Replace `<EC2-IP>` with your actual EC2 instance IP address or hostname
-- For Ubuntu instances, the default user is typically `ubuntu` instead of `ec2-user`
-- If you have additional files (e.g., `MD.gro`, `MD.mdp`), include them in the scp command
-- Ensure your SSH key has proper permissions: `chmod 400 your-key.pem`
+- If you have additional files (e.g., `MD.gro`, `MD.mdp`), include them in the `scp` command.
+- Ensure your SSH key has proper permissions: `chmod 400 <your-key.pem>` (do not commit key files).
 
 ### Example with Additional Files
 
 ```bash
-# Copy all required files at once
-scp MD.tpr MD.cpt MD.gro MD.mdp ec2-user@<EC2-IP>:/home/ec2-user/mdrun/
+scp MD.tpr MD.cpt MD.gro MD.mdp <instance-user>@<EC2-IP>:<remote-path>/
 ```
 
 ### Using SSH Key File
 
-If you're using a specific SSH key file:
+If you use a specific SSH key file (replace with your key path; do not commit keys):
 
 ```bash
-scp -i /path/to/your-key.pem MD.tpr MD.cpt ec2-user@<EC2-IP>:/home/ec2-user/mdrun/
+scp -i /path/to/<your-key.pem> MD.tpr MD.cpt <instance-user>@<EC2-IP>:<remote-path>/
 ```
 
 ### Verify Files Are Copied
 
-After copying, verify the files are on the instance:
-
 ```bash
-ssh ec2-user@<EC2-IP> "ls -lh /home/ec2-user/mdrun/"
+ssh <instance-user>@<EC2-IP> "ls -lh <remote-path>/"
 ```
 
 ## 🏃 Running Molecular Dynamics Simulations
@@ -146,8 +154,8 @@ After copying your input files to the EC2 instance, navigate to the directory co
 ### Using the Run Script
 
 ```bash
-# Navigate to the directory with your input files
-cd /home/ec2-user/mdrun
+# Navigate to the directory with your input files (use your <remote-path>)
+cd <remote-path>
 
 # Copy the run script to this directory (or navigate to where it is)
 # Make the script executable
@@ -162,8 +170,8 @@ chmod +x run_md_aws.sh
 You can also run GROMACS MD simulations directly with GPU acceleration:
 
 ```bash
-# Navigate to the directory with your input files
-cd /home/ec2-user/mdrun
+# Navigate to the directory with your input files (use your <remote-path>)
+cd <remote-path>
 
 # Disable GPU compatibility check (useful for compatibility issues)
 export GMX_GPU_DISABLE_COMPATIBILITY_CHECK=1

@@ -22,6 +22,8 @@ gromacs-gpu-cloud/
 │   ├── run_md.sh                 # Script to run MD simulations on Azure ML
 │   ├── gromacs-job.yml           # Azure ML job configuration
 │   └── README.md                 # Azure ML-specific documentation
+├── docs/                   # Tutorials and reference documentation
+│   └── LINUX_GROMACS_TUTORIAL.md # Linux & GROMACS universal tutorial
 ├── .gitignore              # Git ignore patterns
 └── README.md               # This file
 ```
@@ -52,6 +54,17 @@ For detailed AWS instructions, see [aws/README.md](aws/README.md).
 3. **Monitor** job execution in Azure ML portal
 
 For detailed Azure ML instructions, see [azure-ml/README.md](azure-ml/README.md).
+
+## 📖 Documentation & Tutorials
+
+- **[Linux & GROMACS Universal Tutorial](docs/LINUX_GROMACS_TUTORIAL.md)** — Step-by-step guide covering:
+  - Ubuntu system update and dependency installation
+  - GROMACS installation (package and manual compilation with CUDA)
+  - Additional software (PyMOL, Chimera, AutoDock Vina, Grace, VMD, Chrome)
+  - Full MD workflow: ligand/receptor preparation, system building, NVT/NPT, production run
+  - Trajectory analysis: RMSD, RMSF, H-bonds, gyration radius, energy
+
+Use this tutorial for local Linux setups or as a reference when preparing systems before running them on AWS/Azure.
 
 ## 🔧 Features
 
